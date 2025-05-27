@@ -7,6 +7,7 @@ interface EnvVars {
   STRIPE_SUCCESS_URL: string;
   STRIPE_CANCEL_URL: string;
   STRIPE_WEBHOOK_SECRET: string;
+  NATS_SERVERS: string;
 }
 
 const envVarsSchema = joi
@@ -16,10 +17,16 @@ const envVarsSchema = joi
     STRIPE_SUCCESS_URL: joi.string().required(),
     STRIPE_CANCEL_URL: joi.string().required(),
     STRIPE_WEBHOOK_SECRET: joi.string().required(),
+    NATS_SERVERS: joi.array().items(joi.string()).required(),
   })
   .unknown(true);
 
-const validationResult = envVarsSchema.validate(process.env);
+const validationResult = envVarsSchema.validate({
+  ...process.env,
+  NATS_SERVERS: process.env.NATS_SERVERS
+    ? process.env.NATS_SERVERS.split(',')
+    : [],
+});
 const error = validationResult.error;
 const value = validationResult.value as EnvVars;
 
@@ -35,4 +42,5 @@ export const envs = {
   stripeSuccessUrl: envVars.STRIPE_SUCCESS_URL,
   stripeCancelUrl: envVars.STRIPE_CANCEL_URL,
   stripeWebhookSecret: envVars.STRIPE_WEBHOOK_SECRET,
+  natsServers: envVars.NATS_SERVERS,
 };
